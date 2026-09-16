@@ -1,0 +1,2 @@
+# Core app uses only the Python standard library.
+# Free production tools and optional local TTS have separate environments.

@@ -1,0 +1,28 @@
+# Generated films, personal workspaces and downloaded tools
+outputs/
+assets/
+tools/
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*.log
+*.pid
+*.tmp
+.env
+.env.*
+!.env.example
+.codex/
+.auth/
+auth.json
+credentials*.json
+*token*.json
+# Local build artifacts
+dist/
+build/
+*.egg-info/
+.pytest_cache/
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

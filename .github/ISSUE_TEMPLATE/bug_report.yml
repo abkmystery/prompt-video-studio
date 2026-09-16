@@ -1,0 +1,52 @@
+name: Bug report
+description: Report a reproducible setup, production, or playback problem.
+title: "[Bug]: "
+body:
+  - type: markdown
+    attributes:
+      value: "Remove credentials, private prompts, personal paths, and account details. For vulnerabilities, follow SECURITY.md."
+  - type: input
+    id: version
+    attributes:
+      label: App version
+      placeholder: v0.1.0 or commit
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Windows, Python, Codex, Blender, and FFmpeg versions when relevant.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Include a small original sample prompt if safe to share.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected result
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual result
+      description: Include the production stage and error.
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Sanitized logs or screenshots
+  - type: checkboxes
+    id: privacy
+    attributes:
+      label: Privacy check
+      options:
+        - label: I reviewed this report for credentials and private data.
+          required: true

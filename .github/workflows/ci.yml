@@ -1,0 +1,31 @@
+name: Windows checks
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        python-version: ['3.11', '3.13']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Run app and packaging tests
+        run: python -m unittest discover -s tests -v
+      - name: Build portable source package
+        run: python scripts/build_release.py --version 0.1.0 --output-dir dist
+      - name: Save Windows ZIP
+        if: matrix.python-version == '3.13'
+        uses: actions/upload-artifact@v4
+        with:
+          name: prompt-video-studio-windows
+          path: dist/*
+          if-no-files-found: error

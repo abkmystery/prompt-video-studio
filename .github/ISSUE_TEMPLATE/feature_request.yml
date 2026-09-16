@@ -1,0 +1,22 @@
+name: Feature request
+description: Suggest an improvement to a concrete production workflow.
+title: "[Feature]: "
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What would you like to accomplish?
+      description: Describe your workflow and where the app falls short.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed improvement
+    validations:
+      required: true
+  - type: textarea
+    id: success
+    attributes:
+      label: How would you know it works?
+      description: Include a small example or acceptance criteria.

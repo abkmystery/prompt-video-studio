@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Setup and troubleshooting
+    url: https://github.com/abkmystery/prompt-video-studio/blob/main/docs/troubleshooting.md
+    about: Common startup, rendering, account, and audio issues.
+  - name: Security reporting
+    url: https://github.com/abkmystery/prompt-video-studio/blob/main/SECURITY.md
+    about: Read the private reporting process before disclosing a vulnerability.
