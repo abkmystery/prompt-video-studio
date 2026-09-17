@@ -10,7 +10,7 @@ import time
 import webbrowser
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
-from urllib.parse import unquote, urlsplit
+from urllib.parse import parse_qs, unquote, urlsplit
 from studio.codex_bridge import CodexBridge
 from studio.jobs import JobManager
 from studio.common import safe_error
@@ -41,7 +41,7 @@ class StudioServer(ThreadingHTTPServer):
             return self.status_cache[1]
 
 class Handler(BaseHTTPRequestHandler):
-    server_version = 'PromptVideoStudio/0.1.0'
+    server_version = 'PromptVideoStudio/0.2.0'
     def log_message(self, *args):
         # No request body, prompt or credential logging.
         pass
@@ -80,12 +80,22 @@ class Handler(BaseHTTPRequestHandler):
         path = unquote(urlsplit(self.path).path)
         try:
             if path == '/api/health':
-                return self._json({'app':'Prompt Video Studio', 'version':'0.1.0'})
+                return self._json({'app':'Prompt Video Studio', 'version':'0.2.0'})
             if path == '/api/status':
                 return self._json({'csrf_token':self.server.csrf, 'output_dir':str(self.server.manager.outputs),
                                    'capabilities':self.server.manager.capabilities(), 'codex':self.server.codex_status()})
             if path == '/api/jobs':
                 return self._json({'jobs':self.server.manager.list()})
+            if path == '/api/assets':
+                return self._json({'assets':self.server.manager.library.list()})
+            match = re.fullmatch(r'/api/assets/([a-f0-9]{16})', path)
+            if match:
+                return self._json(self.server.manager.library.get(match[1]))
+            if path == '/api/imports':
+                return self._json({'imports':self.server.manager.imports.list()})
+            match = re.fullmatch(r'/api/imports/([a-f0-9]{16})', path)
+            if match:
+                return self._json(self.server.manager.imports.get(match[1]))
             match = re.fullmatch(r'/api/jobs/([a-f0-9]{16})', path)
             if match:
                 return self._json(self.server.manager.get(match[1]))
@@ -94,13 +104,19 @@ class Handler(BaseHTTPRequestHandler):
                 file = self.server.manager.outputs / match[1] / match[2]
                 if file.is_file() and file.resolve().is_relative_to(self.server.manager.outputs.resolve()):
                     return self._file(file, download=match[2].endswith(('.blend','.zip','.srt','.json','.md')))
-            if path in {'/','/index.html','/styles.css','/app.js'}:
+            match = re.fullmatch(r'/library/([a-f0-9]{16})/([a-zA-Z0-9.-]+)', path)
+            if match:
+                return self._file(self.server.manager.library.file(match[1],match[2]),download=match[2].endswith(('.blend','.glb','.md')))
+            match = re.fullmatch(r'/imports/([a-f0-9]{16})/([a-zA-Z0-9.-]+)', path)
+            if match:
+                return self._file(self.server.manager.imports.file(match[1],match[2]),download=True)
+            if path in {'/','/index.html','/styles.css','/features.css','/app.js','/app-v2.js'}:
                 file = self.server.root / 'web' / ('index.html' if path == '/' else path[1:])
                 if file.is_file():
                     return self._file(file)
             self._json({'error':'Not found.'},404)
         except KeyError:
-            self._json({'error':'Video job not found.'},404)
+            self._json({'error':'Item not found.'},404)
         except (BrokenPipeError, ConnectionResetError, ConnectionAbortedError):
             pass
         except Exception as exc:
@@ -151,17 +167,32 @@ class Handler(BaseHTTPRequestHandler):
     def do_POST(self):
         if not self._allowed() or not hmac.compare_digest(self.headers.get('X-Studio-Token',''),self.server.csrf):
             return self._json({'error':'Refresh the app before trying again.'},403)
-        if self.headers.get_content_type() != 'application/json':
-            return self._json({'error':'Expected JSON.'},415)
         try:
-            length = int(self.headers.get('Content-Length','0'))
+            raw_length = self.headers.get('Content-Length')
+            if raw_length is None or not re.fullmatch(r'\d+',raw_length):
+                return self._json({'error':'A valid Content-Length is required.'},411)
+            length = int(raw_length)
+            split = urlsplit(self.path)
+            path = split.path
+            if path == '/api/imports':
+                if self.headers.get('Transfer-Encoding'):
+                    return self._json({'error':'Chunked uploads are not supported.'},400)
+                query = parse_qs(split.query,keep_blank_values=True)
+                kind = query.get('kind',[''])[0]
+                name = query.get('name',[''])[0]
+                limit = self.server.manager.imports and {'video':512*1024*1024,'script':1024*1024}.get(kind)
+                if not limit or not 1 <= length <= limit:
+                    return self._json({'error':'The upload is empty, too large or has an invalid kind.'},413)
+                self.connection.settimeout(60)
+                return self._json(self.server.manager.imports.save(self.rfile,length,kind,name),201)
+            if self.headers.get_content_type() != 'application/json':
+                return self._json({'error':'Expected JSON.'},415)
             if not 1 <= length <= 32768:
                 return self._json({'error':'Request is empty or too large.'},413)
             self.connection.settimeout(15)
             body = json.loads(self.rfile.read(length))
             if not isinstance(body,dict):
                 raise ValueError('Expected a JSON object.')
-            path = urlsplit(self.path).path
             if path == '/api/shutdown':
                 self._json({'ok':True})
                 threading.Thread(target=self.server.shutdown,daemon=True).start()
@@ -191,7 +222,7 @@ class Handler(BaseHTTPRequestHandler):
                 return self._json({'ok':True})
             self._json({'error':'Not found.'},404)
         except KeyError:
-            self._json({'error':'Video job not found.'},404)
+            self._json({'error':'Item not found.'},404)
         except (ValueError, TypeError) as exc:
             self._json({'error':safe_error(exc)},400)
         except (BrokenPipeError, ConnectionResetError, ConnectionAbortedError):

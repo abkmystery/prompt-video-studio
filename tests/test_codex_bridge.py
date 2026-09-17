@@ -178,6 +178,20 @@ class CodexBridgeTests(unittest.TestCase):
         self.assertEqual(bridge.calls[0][0], "thread/resume")
         self.assertTrue(bridge.calls[0][1]["excludeTurns"])
 
+    def test_automatic_review_applies_to_thread_and_turn(self):
+        bridge = PlanningBridge([completed(text="Created")])
+        bridge.start_production(Path.cwd(), "Make an asset", lambda event: None, threading.Event(),
+                                approval_mode="automatic", kind="asset")
+        self.assertEqual(bridge.calls[0][1]["approvalsReviewer"],"auto_review")
+        self.assertEqual(bridge.calls[1][1]["approvalsReviewer"],"auto_review")
+        self.assertEqual(len(bridge.calls[1][1]["sandboxPolicy"]["writableRoots"]),3)
+
+    def test_unknown_approval_mode_is_rejected_before_start(self):
+        bridge = PlanningBridge([])
+        with self.assertRaises(CodexError):
+            bridge.start_production(Path.cwd(), "Make a video", lambda event: None, threading.Event(),approval_mode="always")
+        self.assertEqual(bridge.calls,[])
+
     def test_production_cancel_before_start_uses_no_turn(self):
         bridge = PlanningBridge([])
         cancelled = threading.Event()

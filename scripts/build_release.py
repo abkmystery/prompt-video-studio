@@ -7,12 +7,12 @@ import re
 import zipfile
 
 REQUIRED = (
-    "server.py", "requirements.txt", "README.md", "LICENSE", "PRODUCTION.md", "PRODUCTION_SCOPE.md", "TOOLS.md",
+    "server.py", "requirements.txt", "README.md", "LICENSE", "PRODUCTION.md", "ASSET_PRODUCTION.md", "PRODUCTION_SCOPE.md", "TOOLS.md",
     "Setup.cmd", "Start Studio.cmd", "Stop Studio.cmd", "setup.ps1", "launch.ps1", "stop.ps1",
     "scripts/windows_common.ps1", "scripts/build_release.py",
     "studio/__init__.py", "studio/blender_scene.py", "studio/codex_bridge.py", "studio/common.py",
-    "studio/jobs.py", "studio/local_render.py", "studio/production_tools.py",
-    "web/index.html", "web/app.js", "web/styles.css",
+    "studio/jobs.py", "studio/imports.py", "studio/library.py", "studio/local_render.py", "studio/production_tools.py",
+    "web/index.html", "web/app.js", "web/app-v2.js", "web/styles.css", "web/features.css",
 )
 OPTIONAL = (
     "NOTICE", "CHANGELOG.md", "docs/release-notes.md",

@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.2.0 — 2026-09-17
+
+- Added immutable reusable character, object, and scene assets with derived-version lineage.
+- Added video and script imports for new extend and revise jobs while preserving original films and sources.
+- Added per-job manual approval or automatic Codex safety review using the same scoped workspace.
+- Added validated, allowlisted asset and import storage with bounded uploads and safe artifact URLs.
+- Added separate film, asset, and continuation workflows to the local studio interface.
+
 ## 0.1.0 — 2026-09-15
 
 First public alpha.

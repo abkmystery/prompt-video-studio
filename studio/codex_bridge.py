@@ -537,7 +537,7 @@ class CodexBridge:
                 pass
 
     def start_production(self, workspace: Path, prompt: str, on_event,
-                         cancel_event, thread_id=None) -> dict:
+                         cancel_event, thread_id=None, approval_mode="manual", kind="video") -> dict:
         """Run a real Codex turn with local tools; output verification is the caller's job.
 
         The job thread is persisted by Codex and can be resumed after a stopped
@@ -554,6 +554,11 @@ class CodexBridge:
             raise CodexError("The production job configuration is invalid.")
         if thread_id is not None and (not isinstance(thread_id, str) or not re.fullmatch(r"[a-zA-Z0-9_-]{1,100}", thread_id)):
             raise CodexError("Invalid Codex task identifier.")
+        if approval_mode not in {"manual", "automatic"}:
+            raise CodexError("Approval mode must be manual or automatic.")
+        if kind not in {"video", "asset"}:
+            raise CodexError("Production kind must be video or asset.")
+        reviewer = "auto_review" if approval_mode == "automatic" else "user"
         if not self._generation_lock.acquire(blocking=False):
             raise CodexError("Codex is already producing a video. Wait for it to finish or cancel it first.")
         turn_id = None
@@ -569,18 +574,20 @@ class CodexBridge:
                 raise CodexError("Sign in with ChatGPT in Codex before starting production.")
             if cancel_event.is_set():
                 return {"thread_id": thread_id, "status": "cancelled", "text": "Production cancelled before it started."}
-            rules = ("You are producing a complete video with audio for Prompt Video Studio. "
+            deliverable = ("a complete video with audio" if kind == "video" else
+                           "a self-contained reusable 3D asset and preview")
+            rules = (f"You are producing {deliverable} for Prompt Video Studio. "
                      "Use only free local software, free downloadable models, and media licensed for the requested use. "
                      "Do not use paid generation APIs, buy services, or publish/upload/send anything. "
                      "Use available configured tools, including computer control when available, to do real production work. "
-                     "Create and verify playable media; do not stop after writing a script or plan. "
+                     "Create and verify the requested deliverables; do not stop after writing a script or plan. "
                      "Keep production outputs inside the current job folder and shared downloaded software/models "
                      "inside the studio tools or assets folders. Do not put project files in OneDrive. "
                      "Respect the configured sandbox and request approval for additional permissions; do not bypass denials. "
                      "Never display credentials or read credential files. Report missing tools or access honestly. "
                      "The user's requested duration may be up to 20 minutes; choose a feasible production style and work in scenes. "
                      "The app independently verifies the final file before showing the job as complete.")
-            params = {"cwd": str(job_path), "approvalPolicy": "on-request", "approvalsReviewer": "user",
+            params = {"cwd": str(job_path), "approvalPolicy": "on-request", "approvalsReviewer": reviewer,
                       "sandbox": "workspace-write", "developerInstructions": rules}
             if thread_id:
                 params.update({"threadId": thread_id, "excludeTurns": True})
@@ -597,10 +604,10 @@ class CodexBridge:
                 return {"thread_id": active_thread, "status": "cancelled", "text": "Production cancelled before its model turn started."}
             with self._state:
                 cursor = self._sequence
-            self._emit({"type": "stage", "stage": "working", "text": "Codex is creating the video with available free tools."})
+            self._emit({"type": "stage", "stage": "working", "text": f"Codex is creating the {kind} with available free tools."})
             turn = self._rpc("turn/start", {"threadId": active_thread,
                 "input": [{"type": "text", "text": prompt}], "cwd": str(job_path),
-                "approvalPolicy": "on-request", "approvalsReviewer": "user",
+                "approvalPolicy": "on-request", "approvalsReviewer": reviewer,
                 "sandboxPolicy": {"type": "workspaceWrite", "networkAccess": False,
                     "writableRoots": [str(job_path), str(self.workspace / "tools"), str(self.workspace / "assets")]}
                 }, timeout=40)

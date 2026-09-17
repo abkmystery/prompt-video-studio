@@ -20,6 +20,9 @@ Describe your film, sign in through Codex, and follow the production in your bro
 - **Official Codex sign-in:** use supported ChatGPT/Codex access without a separate video-generation API key.
 - **Local animation and audio:** Blender scenes, FFmpeg assembly, and optional stock synthetic narration.
 - **Reusable cast:** a character and voice bible, shared Blender assets, and a scene manifest support continuity.
+- **Reusable asset library:** create characters, objects, and scenes, then derive new immutable versions without overwriting their originals.
+- **Continue or revise:** extend a completed film, or import a video or script and create a separate revised job with copied source material.
+- **Approval choice:** review sensitive actions yourself or select automatic Codex safety review for a job; both modes keep the same local workspace limits.
 - **Saved progress:** continue the same Codex thread and production checkpoints after an interruption.
 - **Visible work:** agent updates, action approvals, video previews, and editable project downloads.
 - **Fixed local demo:** test the rendering pipeline without starting a Codex production turn.
@@ -64,6 +67,8 @@ The studio source is free under MIT. Local media tools avoid a separate paid vid
 The interface and rendered files are local, but **Codex is a cloud AI service**. Prompts and content shared with Codex are processed under your OpenAI account settings and terms. This is not an entirely offline AI generator. The fixed demo can run without a Codex turn once its dependencies are installed.
 
 Keep the extracted folder in Downloads to keep production files outside OneDrive. Jobs live in `outputs/<project-id>/`; shared tools and assets belong in `tools/` and `assets/`. Codex maintains its own normal account and session data separately.
+
+Published reusable assets live in `library/<asset-id>/`, and imported source material lives in `imports/<import-id>/`. Library versions are immutable: editing from a base creates a new ID and preserves the original. Continuations also create new jobs and copy only validated source files into their own job directory.
 
 The app does not upload films to YouTube. Review and publish them yourself. Logs and projects can contain prompts, source material, and local paths: review before sharing. Never paste credentials or authentication tokens into a prompt.
 

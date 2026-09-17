@@ -58,4 +58,47 @@ class JobsTests(unittest.TestCase):
             self.assertTrue(restored['can_resume'])
         finally: other.close()
 
+    def test_legacy_job_defaults_to_video_and_manual_approval(self):
+        directory=self.root/'outputs'/('a'*16)
+        directory.mkdir(parents=True)
+        (directory/'job.json').write_text(json.dumps({'id':'a'*16,'provider':'codex','status':'completed','created_at':'2026-01-01','duration':60}))
+        other=JobManager(self.root,Bridge())
+        try:
+            restored=other.get('a'*16)
+            self.assertEqual((restored['kind'],restored['approval_mode']),('video','manual'))
+        finally: other.close()
+
+    def test_extend_uses_measured_source_duration_and_new_job(self):
+        self.manager.jobs['a'*16]={'id':'a'*16,'provider':'codex','kind':'video','status':'completed','created_at':'2026-01-01',
+            'duration':60,'verification':{'duration_seconds':8.0},'prompt':'source'}
+        source=self.root/'outputs'/('a'*16)
+        source.mkdir(parents=True)
+        (source/'video.mp4').write_bytes(b'original bytes')
+        with patch.object(self.manager.executor,'submit'):
+            job=self.manager.submit({'prompt':'Continue the existing action naturally.','duration':30,'operation':'extend','source_job_id':'a'*16})
+        self.assertNotEqual(job['id'],'a'*16)
+        request=json.loads((self.root/'outputs'/job['id']/'request.json').read_text())
+        self.assertEqual(request['duration'],38.0)
+        self.assertEqual((self.root/'outputs'/job['id']/'source'/'job'/'video.mp4').read_bytes(),b'original bytes')
+
+    def test_asset_job_copies_base_asset_without_mutating_it(self):
+        asset_dir=self.root/'outputs'/('b'*16)
+        asset_dir.mkdir(parents=True)
+        import base64,struct
+        payload=json.dumps({'asset':{'version':'2.0'},'scenes':[{'nodes':[0]}],'nodes':[{}]},separators=(',',':')).encode()
+        payload += b' ' * (-len(payload)%4)
+        (asset_dir/'asset.glb').write_bytes(b'glTF'+struct.pack('<II',2,20+len(payload))+struct.pack('<II',len(payload),0x4E4F534A)+payload)
+        (asset_dir/'preview.png').write_bytes(base64.b64decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII='))
+        (asset_dir/'asset.json').write_text('{"type":"character"}')
+        (asset_dir/'credits.md').write_text('Original')
+        self.manager.library.publish(asset_dir,{'job_id':'b'*16,'asset_type':'character','name':'Hero','prompt':'Hero','style':'anime'})
+        before=(self.root/'library'/('b'*16)/'asset.glb').read_bytes()
+        with patch.object(self.manager.executor,'submit'):
+            job=self.manager.submit({'kind':'asset','asset_type':'character','name':'Hero v2','base_asset_id':'b'*16,
+                'prompt':'Create a revised hero with a blue jacket.','style':'anime'})
+        copied=self.root/'outputs'/job['id']/'references'/'assets'/('b'*16)/'asset.glb'
+        self.assertEqual(copied.read_bytes(),before)
+        copied.write_bytes(b'changed copy')
+        self.assertEqual((self.root/'library'/('b'*16)/'asset.glb').read_bytes(),before)
+
 if __name__=='__main__': unittest.main()

@@ -18,7 +18,17 @@ Use **Sign in with ChatGPT** and finish the official browser flow. An existing C
 
 Choose a 30-second draft. Describe one setting, one action, one or two characters, narration language, and sound preferences. Match the audio, duration, and aspect controls to your prompt. Try an [example](example-prompts.md), then select **Create with Codex**.
 
+Use the three creation tabs for different workflows:
+
+- **Create film** makes a new film and can include selected items from your reusable asset library.
+- **Create asset** builds a character, object, or scene. **Edit from base** creates a new immutable version and keeps the original.
+- **Continue or edit** extends a completed film or revises a completed/imported video or imported UTF-8 script. Extending asks for additional length; revising asks for the desired final length. Every result is a new job.
+
+Video imports accept MP4, WebM, or MOV up to 512 MiB. Script imports accept plain UTF-8 TXT, MD, or SRT up to 1 MiB. Imported files are treated as source data and are never executed.
+
 Missing tools may need downloading. Review the command, paths, and requested permissions when an action approval appears.
+
+The default **Codex approvals** setting asks you to review sensitive actions. **Automatic Codex safety review** lets Codex's reviewer decide those requests while retaining the same local writable folders and network restrictions. It does not grant unrestricted computer access.
 
 ## Review and resume
 

@@ -26,3 +26,6 @@ build/
 .idea/
 .DS_Store
 Thumbs.db
+# Private reusable assets and imported material
+/library/
+/imports/

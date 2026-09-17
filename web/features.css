@@ -1,0 +1,32 @@
+.source-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.source-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  max-width: 100%;
+  border: 1px solid #cddacb;
+  border-radius: 999px;
+  background: #edf4eb;
+  color: #466456;
+  padding: 4px 5px 4px 9px;
+  font-size: 9px;
+  overflow-wrap: anywhere;
+}
+
+.source-chip button {
+  display: grid;
+  place-items: center;
+  width: 19px;
+  height: 19px;
+  border: 0;
+  border-radius: 50%;
+  background: #d8e5d5;
+  color: #466456;
+  padding: 0;
+}
