@@ -21,7 +21,7 @@ jobs:
       - name: Run app and packaging tests
         run: python -m unittest discover -s tests -v
       - name: Build portable source package
-        run: python scripts/build_release.py --version 0.1.0 --output-dir dist
+        run: python scripts/build_release.py --version 0.2.0 --output-dir dist
       - name: Save Windows ZIP
         if: matrix.python-version == '3.13'
         uses: actions/upload-artifact@v4

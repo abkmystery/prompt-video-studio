@@ -6,7 +6,7 @@
 [![Status: alpha](https://img.shields.io/badge/status-alpha-orange.svg)](CHANGELOG.md)
 [![Platform: Windows](https://img.shields.io/badge/platform-Windows-0078D4.svg)](docs/quickstart.md)
 
-[**Download the latest release**](https://github.com/abkmystery/prompt-video-studio/releases/tag/v0.1.0) · [Quick start](docs/quickstart.md) · [Watch the demo](docs/media/demo.mp4) · [Example prompts](docs/example-prompts.md) · [Report a bug](https://github.com/abkmystery/prompt-video-studio/issues/new/choose)
+[**Download the latest release**](https://github.com/abkmystery/prompt-video-studio/releases/tag/v0.2.0) · [Quick start](docs/quickstart.md) · [Watch the demo](docs/media/demo.mp4) · [Example prompts](docs/example-prompts.md) · [Report a bug](https://github.com/abkmystery/prompt-video-studio/issues/new/choose)
 
 ![Prompt Video Studio: prompt editor, production settings, progress, and local video library](docs/images/studio-preview.png)
 
@@ -29,7 +29,7 @@ Describe your film, sign in through Codex, and follow the production in your bro
 
 ## Start on Windows
 
-1. Download the Windows ZIP from [Releases](https://github.com/abkmystery/prompt-video-studio/releases/tag/v0.1.0).
+1. Download the Windows ZIP from [Releases](https://github.com/abkmystery/prompt-video-studio/releases/tag/v0.2.0).
 2. Extract the entire ZIP into a regular folder in **Downloads**. Do not launch from inside the ZIP.
 3. Double-click **Start Studio.cmd**. First launch checks Python and prepares a local environment. If Python is missing, setup offers installation through Windows Package Manager or an official manual installer link.
 4. Connect using **Sign in with ChatGPT** and complete the official browser sign-in.
